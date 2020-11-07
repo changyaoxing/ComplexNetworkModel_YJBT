@@ -59,6 +59,8 @@ def YJBT_graph(n, m, seed=None):
 
     # Add m initial nodes (m0 in barabasi-speak)
     G = nx.empty_graph(m)
+
+    node_strength_dict={x:0 for x in range(n)}
     # Target nodes for new edges
     targets = list(range(m))
     # List of existing nodes, with nodes repeated once for each adjacent edge
@@ -75,11 +77,15 @@ def YJBT_graph(n, m, seed=None):
         edges=[]
         for x in k:
             if targets_weight!=0:
-                edges.append((x[0],x[1],repeated_nodes.count(x[1])/targets_weight))
+                weight=repeated_nodes.count(x[1])/targets_weight
             else:
-                edges.append((x[0], x[1], 1/source))
+                weight=1/targets.__len__()
+            edges.append((x[0], x[1], weight))
+            node_strength_dict[x[0]] += weight
+            node_strength_dict[x[1]] += weight
         G.add_weighted_edges_from(edges)
 
+        #每增加一个节点，显示当前的网络形状
         pos = nx.spring_layout(G)
         nx.draw(G, pos)
         edge_lable = nx.get_edge_attributes(G, "weight")
@@ -96,6 +102,28 @@ def YJBT_graph(n, m, seed=None):
         # Pick uniformly from repeated_nodes (preferential attachment)
         targets = _random_subset(repeated_nodes, m, seed)
         source += 1
+
+
+
+    #显示度分布
+    node_weight_dict={x:repeated_nodes.count(x) for x in repeated_nodes}
+    node_weight_list=list(node_weight_dict.values())
+    node_weight_list.sort()
+
+    weight_distribute_dict={x:node_weight_list.count(x) for x in node_weight_list}
+    plt.plot(weight_distribute_dict.keys(),weight_distribute_dict.values())
+    plt.xlabel("weight")
+    plt.ylabel("count")
+    plt.show()
+
+    node_strength_list = list(node_strength_dict.values())
+    node_strength_list.sort()
+    #显示强度分布
+    strength_distribute_dict = {x: node_strength_list.count(x) for x in node_strength_list}
+    plt.plot(strength_distribute_dict.keys(), strength_distribute_dict.values())
+    plt.xlabel("strength")
+    plt.ylabel("count")
+    plt.show()
     return G
 
-YJBT_graph(10,2)
+G=YJBT_graph(100,20)
