@@ -5,7 +5,6 @@ import networkx as nx
 from networkx.utils import py_random_state
 from collections import defaultdict
 
-
 def _random_subset(seq, m, rng):
     """ Return m unique elements from seq.
 
@@ -69,14 +68,16 @@ def YJBT_graph(n, m, seed=None):
     while source < n:
         # Add edges to m nodes from the source.\
         sm=[source] * m
-        dic_weight={x:repeated_nodes.count(x)/repeated_nodes.__len__() for x in repeated_nodes}
+        targets_weight=0
+        for t in targets:
+            targets_weight+=repeated_nodes.count(t)
         k=zip(sm, targets)
         edges=[]
         for x in k:
-            if x[1] in dic_weight.keys():
-                edges.append((x[0],x[1],dic_weight[x[1]]))
+            if targets_weight!=0:
+                edges.append((x[0],x[1],repeated_nodes.count(x[1])/targets_weight))
             else:
-                edges.append((x[0], x[1], 0))
+                edges.append((x[0], x[1], 1/source))
         G.add_weighted_edges_from(edges)
 
         pos = nx.spring_layout(G)
@@ -97,4 +98,4 @@ def YJBT_graph(n, m, seed=None):
         source += 1
     return G
 
-YJBT_graph(10,1)
+YJBT_graph(10,2)
